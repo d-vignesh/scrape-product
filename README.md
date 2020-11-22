@@ -13,8 +13,8 @@ Steps to build and test the service:<br/>
        (Note: the scraper, store and database services are configured to run on ports 9001, 9002 and 5432 repectively. ensure these ports are free, or change the ports according in the docker-compose environment variables)<br/>
     4. click on the button to get all the endpoints in postman <br/>[![Run in Postman](https://run.pstmn.io/button.svg)](https://god.postman.co/run-collection/11a39d0cbb511338e62b)<br/> 
         there are three endpoint,<br/>
-            /scrape-product?url - to scrape the product from url<br/>
-            /store-product - to store the given product to db<br/>
+            /scrape-product?url - to scrape the product from url, change the url param value in request to desired product url<br/>
+            /store-product - to store the given product to db, provide product detail in the same json structure are given in postman<br/>
             /get-products - to get the list of all products in db<br/>
 
 Modules used:<br/>
