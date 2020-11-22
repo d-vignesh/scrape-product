@@ -17,7 +17,7 @@ Steps to build and test the service:<br/>
             /store-product - to store the given product to db, provide product detail in the same json structure are given in postman<br/>
             /get-products - to get the list of all products in db<br/>
 
-Modules used:<br/>
+Packages used:<br/>
     * go-colly (for scraping)<br/>
     * go-hclog (for logging)<br/>
     * gorilla/mux (for routing)<br/>
