@@ -1,0 +1,37 @@
+version: '3.1'
+
+services:
+
+  scraper:
+    restart: always
+    build: ./product-scraper
+    depends_on:
+      - store
+    ports:
+      - "9001:9001"
+    environment:
+      SCRAPER_SERVER_ADDRESS: "0.0.0.0:9001" # address for the scraping service listen to
+      STORE_SERVER_ADDRESS: "http://store:9002/store-product" # address to be used by scraping service to store product
+    
+  store:
+    restart: always
+    build: ./product-store
+    depends_on:
+      - database
+    ports:
+      - "9002:9002"
+    environment:
+      STORE_SERVER_ADDRESS: "0.0.0.0:9002" # address for the store service to listen to
+      DB_HOST: database
+      DB_NAME: "postgres"
+      DB_USER: "admin"
+      DB_PASS: "password"
+      DB_PORT: "5432"
+  
+  database:
+    image: postgres:alpine
+    environment:
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_USER: "admin"
+    ports:
+      - "5432:5432"

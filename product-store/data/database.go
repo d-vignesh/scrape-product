@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 )
 
+// NewConnection creates the connection to the database
 func NewConnection(config *utils.Configuration, logger hclog.Logger) (*sqlx.DB, error) {
 
 	host := config.DBHost

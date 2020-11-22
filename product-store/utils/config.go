@@ -5,7 +5,9 @@ import (
 )
 
 type Configuration struct {
+	// address to start the Store service
 	ServerAddress string
+	// database details
 	DBHost		  string
 	DBName		  string
 	DBUser		  string

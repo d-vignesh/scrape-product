@@ -17,6 +17,8 @@ FROM alpine:latest
 
 WORKDIR /app
 
+EXPOSE 9002
+
 COPY --from=builder /build/product-store .
 
 CMD ["./product-store"]

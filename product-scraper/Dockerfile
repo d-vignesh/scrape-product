@@ -17,6 +17,8 @@ FROM alpine:latest
 
 WORKDIR /app
 
+EXPOSE 9001
+
 COPY --from=builder /build/product-scraper .
 
 CMD ["./product-scraper"]

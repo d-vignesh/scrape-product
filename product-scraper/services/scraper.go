@@ -3,7 +3,8 @@ package services
 import (
 	"strings"
 	"strconv"
-	"regexp"
+	"reflect"
+	"encoding/json"
 
 	"github.com/gocolly/colly"
 	"github.com/hashicorp/go-hclog"
@@ -28,25 +29,39 @@ func (s *Scraper) ScrapeURL(url string) *data.Product {
 		s.logger.Info("visiting", r.URL)
 	})
 
+	// checking for the product title
 	c.OnHTML(`span[id=productTitle]`, func(e *colly.HTMLElement) {
 		title := strings.TrimSpace(e.Text)
 		s.logger.Info("found title", title)
 		prod.Name = title
 	})
 
-	c.OnHTML(`img[id=landingImage]`, func(e *colly.HTMLElement) {
-		imgURL := e.Attr("src")
-		s.logger.Info("found img url", imgURL)
-		s.logger.Info("url class", e.Attr("alt"))
-		prod.ImageURL = imgURL
+	// checking for the product image url
+	c.OnHTML(`div[id=imgTagWrapperId]`, func(e *colly.HTMLElement) {
+		imgs := e.ChildAttrs("img", "data-a-dynamic-image")
+		// imgs is a list conainting one string which is a json object in the form url: pixel of all the images of the product
+		if len(imgs) > 0 {
+			imgStr := imgs[0]
+			imgData := make(map[string][]int)
+			if err := json.Unmarshal([]byte(imgStr), &imgData); err != nil {
+				s.logger.Error("unable to unmarshal images list", "error", err)
+			} else {
+				prod.ImageURL = reflect.ValueOf(imgData).MapKeys()[0].String()
+				s.logger.Info("found image url", prod.ImageURL)
+			}
+		} else {
+			s.logger.Error("could not find image url")
+		}
 	})
 
+	// checking for the product description
 	c.OnHTML(`div[id=productDescription]`, func(e *colly.HTMLElement) {
 		description := e.ChildText("p")
 		s.logger.Info("found description", description)
 		prod.Description = description
 	})
 
+	// checking for the product description provided as 'About the product'
 	c.OnHTML(`div[id=feature-bullets]`, func(e *colly.HTMLElement) {
 		if prod.Description == "" {
 			var sb strings.Builder
@@ -60,8 +75,9 @@ func (s *Scraper) ScrapeURL(url string) *data.Product {
 		}
 	})
 
+	// checking for product reviews count
 	c.OnHTML(`span[id=acrCustomerReviewText]`, func(e *colly.HTMLElement) {
-		if prod.Reviews == 0 {
+		if prod.TotalReviews == 0 {
 			ratingString := strings.TrimSpace(e.Text)
 			s.logger.Info("found ratings", ratingString)
 			ratings := strings.Split(ratingString, " ")
@@ -78,21 +94,23 @@ func (s *Scraper) ScrapeURL(url string) *data.Product {
 		}
 	})
 
+	// check for product price, the price was provided under different tags for different tags, 
+	// we are checking for all the possible tags.
 	c.OnHTML(`span[id=priceblock_saleprice]`, func(e *colly.HTMLElement) {
 		price := strings.TrimSpace(e.Text)
-		s.logger.Info("found price", priceString)
+		s.logger.Info("found price", price)
 		prod.Price = price	
 	})
 
 	c.OnHTML(`span[id=priceblock_ourprice]`, func(e *colly.HTMLElement) {
 		price := strings.TrimSpace(e.Text)
-		s.logger.Info("found price", priceString)
+		s.logger.Info("found price", price)
 		prod.Price = price
 	})
 
 	c.OnHTML(`span[id=priceblock_dealprice]`, func(e *colly.HTMLElement) {
 		price := strings.TrimSpace(e.Text)
-		s.logger.Info("found price", priceString)
+		s.logger.Info("found price", price)
 		prod.Price = price
 	})
 

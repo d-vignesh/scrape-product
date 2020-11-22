@@ -5,6 +5,7 @@ import (
 	"github.com/go-playground/validator"
 )
 
+// ValidationError is a wrapper around FieldError
 type ValidationError struct {
 	validator.FieldError
 }
@@ -41,6 +42,7 @@ func NewValidation() *Validation {
 	return &Validation{validate}
 }
 
+// Validates the given struct using tags and returns the list of validation errors
 func (v *Validation) Validate(i interface{}) ValidationErrors {
 	errs := v.validate.Struct(i)
 	if errs == nil {
